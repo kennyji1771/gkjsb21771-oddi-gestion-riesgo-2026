@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Censo de Damnificados – Sismo</title>
+    <style>
+        /* ===== ESTILOS ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
+        .form-container { max-width: 950px; width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); padding: 30px 35px; border-top: 8px solid #c0392b; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .header-left .logo-text { font-size: 14px; font-weight: 600; color: #1e3c1e; }
+        .header-right { text-align: right; font-size: 14px; color: #555; }
+        .header-right strong { color: #c0392b; }
+        h1 { font-size: 28px; color: #c0392b; margin-bottom: 6px; font-weight: 700; }
+        .subtitle { font-size: 16px; color: #555; margin-bottom: 25px; border-left: 4px solid #c0392b; padding-left: 16px; background: #fef9f9; padding: 12px 16px; border-radius: 6px; }
+        .form-group { margin-bottom: 18px; }
+        .form-row { display: flex; gap: 20px; flex-wrap: wrap; }
+        .form-row .form-group { flex: 1 1 200px; }
+        label { display: block; font-weight: 600; font-size: 14px; color: #1e3c1e; margin-bottom: 5px; }
+        label .required { color: #c0392b; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border .3s;
+            background: #fafafa;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #c0392b;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(192,57,43,0.15);
+        }
+        textarea { resize: vertical; min-height: 60px; }
+        .help-text { font-size: 12px; color: #777; margin-top: 4px; }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3c1e;
+            background: #f0f0f0;
+            padding: 8px 18px;
+            border-radius: 30px;
+            display: inline-block;
+            margin: 10px 0 16px 0;
+            border-left: 6px solid #c0392b;
+        }
+        .grupos-wrapper { overflow-x: auto; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+        table th { background: #f5f5f5; padding: 8px 4px; text-align: center; font-weight: 600; border-bottom: 2px solid #ccc; white-space: nowrap; }
+        table td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #eee; vertical-align: middle; }
+        table td input, table td select { width: 100%; padding: 4px 3px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
+        table td input[type="number"] { width: 55px; min-width: 40px; text-align: center; }
+        .triaje-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; color: #fff; }
+        .triaje-rojo { background: #c0392b; }
+        .triaje-amarillo { background: #f39c12; }
+        .triaje-verde { background: #27ae60; }
+        .btn-eliminar-fila { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
+        .btn-eliminar-fila:hover { background: #c0392b; }
+        .btn-agregar { background: #27ae60; color: #fff; border: none; border-radius: 6px; padding: 10px 20px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin: 5px 0 15px 0; }
+        .btn-agregar:hover { background: #1e8449; }
+        .leyenda-triaje { display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; margin: 10px 0 15px 0; padding: 10px; background: #f9f9f9; border-radius: 6px; }
+        .leyenda-item { display: flex; align-items: center; gap: 8px; }
+        .leyenda-color { display: inline-block; width: 16px; height: 16px; border-radius: 4px; }
+        .leyenda-color.rojo { background: #c0392b; }
+        .leyenda-color.amarillo { background: #f39c12; }
+        .leyenda-color.verde { background: #27ae60; }
+        .actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; border-top: 1px solid #e0e0e0; padding-top: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 30px; border: none; border-radius: 6px; font-weight: 600; font-size: 16px; cursor: pointer; transition: background .2s; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-primary { background: #c0392b; color: #fff; }
+        .btn-primary:hover { background: #a93226; }
+        .btn-secondary { background: #e0e0e0; color: #333; }
+        .btn-secondary:hover { background: #c8c8c8; }
+        .btn-sheet { background: #1e8449; color: #fff; }
+        .btn-sheet:hover { background: #145a32; }
+        #responseMessage { margin-top: 20px; padding: 14px 20px; border-radius: 8px; font-weight: 500; display: none; }
+        #responseMessage.success { display: block; background: #d4edda; color: #155724; border-left: 6px solid #28a745; }
+        #responseMessage.error { display: block; background: #f8d7da; color: #721c24; border-left: 6px solid #dc3545; }
+        #responseMessage.info { display: block; background: #d1ecf1; color: #0c5460; border-left: 6px solid #17a2b8; }
+        .contador { font-size: 13px; color: #777; text-align: right; margin-top: 3px; }
+        .contador.limite { color: #c0392b; font-weight: 600; }
+        .campo-codigo {
+            background: #f0f4f0;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 650px) {
+            .form-container { padding: 20px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .header-right { text-align: left; width: 100%; }
+            .form-row { flex-direction: column; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .btn { text-align: center; }
+            table td input[type="number"] { width: 45px; }
+        }
+        .aviso { background: #fef9e7; border-left: 6px solid #f1c40f; padding: 10px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="header">
+            <div class="header-left">
+                <div style="font-size:22px; font-weight:800; color:#c0392b;">CENSO DAMNIFICADOS</div>
+                <div style="font-size:12px; color:#555; font-weight:600;">Emergencia Sísmica – Registro de Familias</div>
+            </div>
+            <div class="header-right">
+                <strong>VERSIÓN 7.2</strong><br>
+                <span style="font-size:12px;">Con Nº de Apartamento y Estado de Vivienda</span>
+            </div>
+        </div>
+
+        <h1>Registro de Familias Damnificadas</h1>
+        <div class="subtitle">
+            Complete este formulario para censar a su grupo familiar. Los campos con <span style="color:#c0392b;">*</span> son obligatorios.
+        </div>
+
+        <div class="aviso">
+            <strong>📌 Importante:</strong> Indique el <strong>código de carga</strong> de su comunidad y el <strong>número exacto de su apartamento o casa</strong>.
+            Esto nos permite tener un registro preciso de las viviendas afectadas.
+        </div>
+
+        <form id="registroForm">
+            <!-- DATOS DEL RESPONSABLE -->
+            <div class="section-title">Datos del Responsable</div>
+            <p style="font-size:14px; color:#555; margin-bottom:12px;">Quien llena el censo (jefe/a de familia).</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombres">Nombres <span class="required">*</span></label>
+                    <input type="text" id="nombres" name="nombres" placeholder="Ej. José" required>
+                </div>
+                <div class="form-group">
+                    <label for="apellidos">Apellidos <span class="required">*</span></label>
+                    <input type="text" id="apellidos" name="apellidos" placeholder="Ej. Pérez" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cedula">Cédula <span class="required">*</span></label>
+                    <input type="text" id="cedula" name="cedula" placeholder="12345678" inputmode="numeric" required>
+                    <div class="help-text">Solo números.</div>
+                </div>
+                <div class="form-group">
+                    <label for="fnacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fnacimiento" name="fnacimiento">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="telefono">Teléfono <span class="required">*</span></label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="0412-1234567" required>
+                    <div class="help-text">Se normalizará a +58...</div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" placeholder="ejemplo@dominio.com" required>
+                </div>
+            </div>
+
+            <!-- UBICACIÓN ACTUALIZADA -->
+            <div class="section-title">Ubicación de la Vivienda</div>
+            <p style="font-size:14px; color:#555; margin-bottom:12px;">
+                Complete los datos de su residencia para identificar la vivienda afectada.
+            </p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ubicacion">Código de carga (3 dígitos) <span class="required">*</span></label>
+                    <input type="text" id="ubicacion" name="ubicacion" 
+                           placeholder="Ej. 101" 
+                           maxlength="3" 
+                           minlength="3"
+                           pattern="[0-9]{3}"
+                           class="campo-codigo"
+                           title="Ingrese exactamente 3 dígitos (001-999)"
+                           required>
+                    <div class="help-text">Código asignado a su comunidad. Ej: 101 = 5 Héroes Cubanos</div>
+                </div>
+                <div class="form-group">
+                    <label for="nro_vivienda">Nº Casa / Apartamento <span class="required">*</span></label>
+                    <input type="text" id="nro_vivienda" name="nro_vivienda" 
+                           placeholder="Ej. G-8-11" 
+                           maxlength="7"
+                           pattern="[A-Za-z0-9\-]{1,7}"
+                           title="Máximo 7 caracteres (letras, números y guiones)"
+                           required>
+                    <div class="help-text">Identificador de su vivienda. Ej: G-8-11, M-146, B-12</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="direccion">Dirección completa</label>
+                <input type="text" id="direccion" name="direccion" 
+                       placeholder="Ej. Av. Bolívar, Urbanismo 5 Héroes Cubanos, San Agustín"
+                       maxlength="200">
+                <div class="help-text">Dirección general de la residencia (opcional pero recomendado).</div>
+            </div>
+
+            <!-- GRUPOS FAMILIARES -->
+            <div class="section-title">Personas a Censar (Grupos)</div>
+            <p style="font-size:14px; color:#555; margin-bottom:12px;">
+                Agregue una fila por cada <strong>rango de edad y género</strong> diferente.
+            </p>
+            <div id="grupos-container">
+                <div class="grupos-wrapper">
+                    <table id="tabla-grupos">
+                        <thead>
+                            <tr>
+                                <th>Rango</th><th>Género</th><th>Cant</th><th>Embar.</th>
+                                <th>Discapac.</th><th>Mov. reduc.</th><th>Encamado</th>
+                                <th>Convale.</th><th>Trat. crón.</th><th>Oxígeno</th>
+                                <th>Diálisis</th><th>Parto</th><th>Triaje</th><th>✕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-grupos"></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-agregar" id="btnAgregarGrupo">➕ Agregar grupo</button>
+            </div>
+
+            <!-- LEYENDA DE TRIAJE -->
+            <div class="leyenda-triaje">
+                <span style="font-weight:600; margin-right:10px;">Significado del Triaje:</span>
+                <div class="leyenda-item"><span class="leyenda-color verde"></span> <strong>Verde:</strong> Sin condiciones críticas (prioridad baja).</div>
+                <div class="leyenda-item"><span class="leyenda-color amarillo"></span> <strong>Amarillo:</strong> Con condiciones de salud (prioridad media).</div>
+                <div class="leyenda-item"><span class="leyenda-color rojo"></span> <strong>Rojo:</strong> Encamados, embarazadas o parto inminente (prioridad máxima).</div>
+            </div>
+
+            <!-- ESTADO DE LA VIVIENDA -->
+            <div class="section-title">Estado de la Vivienda</div>
+            <div class="form-group">
+                <label for="observaciones">Describa los daños visibles en su apartamento/casa después del sismo <span class="required">*</span></label>
+                <textarea id="observaciones" name="observaciones" rows="4" placeholder="Ej. Grietas en la pared de la sala, techo fracturado, puerta de entrada descuadrada, caída de cerámicas..." required></textarea>
+                <div class="help-text">Máximo 300 caracteres. Sea específico para que podamos evaluar los daños.</div>
+                <div class="contador" id="contadorObservaciones">0 / 300</div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="actions">
+                <a href="https://docs.google.com/spreadsheets/d/1N2XoNkqyxYbNan8if58zQtW2Vv3rNenHYMyyw0HLIVc/edit?usp=sharing" target="_blank" class="btn btn-sheet">📊 Ver registros</a>
+                <button type="button" class="btn btn-secondary" id="btnLimpiar">Limpiar</button>
+                <button type="submit" class="btn btn-primary">📋 Guardar censo</button>
+            </div>
+        </form>
+
+        <div id="responseMessage"></div>
+    </div>
+
+    <script>
+        // ================================================================
+        // CONFIGURACIÓN
+        // ================================================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGVdsu3f-er16RytgS8agEaOV1SDW9HE22tzA2AoTMpwaaizPFty8sgRFjjKRNC8tPJw/exec';  // <-- CAMBIAR
+
+        const RANGOS = ['0-5', '6-12', '13-17', '18-59', '60+'];
+        let contadorFilas = 0;
+
+        // ================================================================
+        // TABLA DE GRUPOS
+        // ================================================================
+        function agregarFilaGrupo(rango = '', genero = '', cantidad = 1) {
+            const tbody = document.getElementById('tbody-grupos');
+            const tr = document.createElement('tr');
+            tr.dataset.filaId = ++contadorFilas;
+
+            const crearSelect = (nombre, opciones, valor) => {
+                const td = document.createElement('td');
+                const sel = document.createElement('select');
+                sel.name = nombre;
+                opciones.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt;
+                    o.textContent = opt;
+                    if (opt === valor) o.selected = true;
+                    sel.appendChild(o);
+                });
+                td.appendChild(sel);
+                return td;
+            };
+
+            const crearInputNum = (nombre, val = 0, min = 0) => {
+                const td = document.createElement('td');
+                const inp = document.createElement('input');
+                inp.type = 'number';
+                inp.name = nombre;
+                inp.min = min;
+                inp.value = val;
+                inp.style.width = '50px';
+                td.appendChild(inp);
+                return td;
+            };
+
+            tr.appendChild(crearSelect('rango', ['', ...RANGOS], rango));
+            tr.appendChild(crearSelect('genero', ['', 'Masculino', 'Femenino'], genero));
+            tr.appendChild(crearInputNum('cantidad', cantidad, 0));
+
+            const tdEmb = crearInputNum('embarazadas', 0, 0);
+            tr.appendChild(tdEmb);
+
+            tr.appendChild(crearInputNum('discapacidad', 0, 0));
+            tr.appendChild(crearInputNum('movilidad', 0, 0));
+            tr.appendChild(crearInputNum('encamado', 0, 0));
+            tr.appendChild(crearInputNum('convaleciente', 0, 0));
+            tr.appendChild(crearInputNum('tratamiento', 0, 0));
+            tr.appendChild(crearInputNum('oxigeno', 0, 0));
+            tr.appendChild(crearInputNum('dialisis', 0, 0));
+            tr.appendChild(crearInputNum('parto', 0, 0));
+
+            // Triaje
+            const tdTriaje = document.createElement('td');
+            const spanTriaje = document.createElement('span');
+            spanTriaje.className = 'triaje-badge triaje-verde';
+            spanTriaje.textContent = 'Verde';
+            tdTriaje.appendChild(spanTriaje);
+            tr.appendChild(tdTriaje);
+
+            // Eliminar
+            const tdAccion = document.createElement('td');
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.className = 'btn-eliminar-fila';
+            btnEliminar.textContent = '✕';
+            btnEliminar.addEventListener('click', function() {
+                if (document.querySelectorAll('#tbody-grupos tr').length > 1) {
+                    tr.remove();
+                } else {
+                    mostrarMensaje('Debe haber al menos un grupo.', 'error');
+                }
+            });
+            tdAccion.appendChild(btnEliminar);
+            tr.appendChild(tdAccion);
+
+            // Eventos para recalcular triaje
+            const inputs = tr.querySelectorAll('input[type="number"]');
+            inputs.forEach(inp => {
+                inp.addEventListener('input', () => calcularTriajeFila(tr));
+            });
+            const selectGen = tr.querySelector('select[name="genero"]');
+            selectGen.addEventListener('change', function() {
+                const embInput = tr.querySelector('input[name="embarazadas"]');
+                if (this.value !== 'Femenino') {
+                    embInput.value = 0;
+                    embInput.disabled = true;
+                } else {
+                    embInput.disabled = false;
+                }
+                calcularTriajeFila(tr);
+            });
+
+            tbody.appendChild(tr);
+            calcularTriajeFila(tr);
+        }
+
+        function calcularTriajeFila(tr) {
+            const getVal = (name) => parseInt(tr.querySelector(`input[name="${name}"]`).value) || 0;
+            const encamado = getVal('encamado');
+            const embarazadas = getVal('embarazadas');
+            const parto = getVal('parto');
+            const movilidad = getVal('movilidad');
+            const discapacidad = getVal('discapacidad');
+            const convaleciente = getVal('convaleciente');
+            const tratamiento = getVal('tratamiento');
+            const oxigeno = getVal('oxigeno');
+            const dialisis = getVal('dialisis');
+
+            let triaje = 'Verde';
+            if (encamado > 0 || embarazadas > 0 || parto > 0) triaje = 'Rojo';
+            else if (movilidad > 0 || discapacidad > 0 || convaleciente > 0 || tratamiento > 0 || oxigeno > 0 || dialisis > 0) triaje = 'Amarillo';
+
+            const span = tr.querySelector('.triaje-badge');
+            span.textContent = triaje;
+            span.className = `triaje-badge triaje-${triaje.toLowerCase()}`;
+        }
+
+        document.getElementById('btnAgregarGrupo').addEventListener('click', () => agregarFilaGrupo());
+
+        // ================================================================
+        // ENVÍO DEL FORMULARIO
+        // ================================================================
+        document.getElementById('registroForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await guardarCenso();
+        });
+
+        async function guardarCenso() {
+            const form = document.getElementById('registroForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => { data[key] = value; });
+
+            // Validar obligatorios
+            const required = ['nombres', 'apellidos', 'cedula', 'telefono', 'email', 'ubicacion', 'nro_vivienda', 'observaciones'];
+            for (let field of required) {
+                if (!data[field] || data[field].trim() === '') {
+                    mostrarMensaje(`El campo "${field}" es obligatorio.`, 'error');
+                    return;
+                }
+            }
+
+            // Validar código de carga (exactamente 3 dígitos)
+            const codigoCarga = data.ubicacion.trim();
+            if (!/^[0-9]{3}$/.test(codigoCarga)) {
+                mostrarMensaje('❌ El código de carga debe tener exactamente 3 dígitos (001-999).', 'error');
+                return;
+            }
+
+            // Validar Nº vivienda (máximo 7 caracteres, solo letras, números y guiones)
+            const nroVivienda = data.nro_vivienda.trim();
+            if (!/^[A-Za-z0-9\-]{1,7}$/.test(nroVivienda)) {
+                mostrarMensaje('❌ El Nº de vivienda solo puede tener letras, números y guiones (máx. 7 caracteres).', 'error');
+                return;
+            }
+
+            // Limpiar cédula
+            const cedulaLimpia = data.cedula.replace(/[^0-9]/g, '');
+            if (!cedulaLimpia || cedulaLimpia.length < 6) {
+                mostrarMensaje('❌ La cédula debe tener al menos 6 dígitos.', 'error');
+                return;
+            }
+            data.cedula = cedulaLimpia;
+
+            // Normalizar teléfono
+            let telefonoLimpio = data.telefono.replace(/[^0-9+]/g, '');
+            if (telefonoLimpio.startsWith('0')) {
+                telefonoLimpio = '+58' + telefonoLimpio.substring(1);
+            } else if (!telefonoLimpio.startsWith('+')) {
+                if (telefonoLimpio.startsWith('58')) {
+                    telefonoLimpio = '+' + telefonoLimpio;
+                } else {
+                    telefonoLimpio = '+58' + telefonoLimpio;
+                }
+            }
+            if (telefonoLimpio.length < 10) {
+                mostrarMensaje('❌ Número de teléfono no válido.', 'error');
+                return;
+            }
+            data.telefono = telefonoLimpio;
+            document.getElementById('telefono').value = telefonoLimpio;
+
+            // Validar email
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                mostrarMensaje('❌ Correo electrónico no válido.', 'error');
+                return;
+            }
+
+            // Obtener grupos
+            const grupos = [];
+            let totalPersonas = 0;
+            const filas = document.querySelectorAll('#tbody-grupos tr');
+            filas.forEach(tr => {
+                const rango = tr.querySelector('select[name="rango"]').value;
+                const genero = tr.querySelector('select[name="genero"]').value;
+                const cantidad = parseInt(tr.querySelector('input[name="cantidad"]').value) || 0;
+                if (cantidad > 0 && rango && genero) {
+                    grupos.push({
+                        rango, genero, cantidad,
+                        embarazadas: parseInt(tr.querySelector('input[name="embarazadas"]').value) || 0,
+                        discapacidad: parseInt(tr.querySelector('input[name="discapacidad"]').value) || 0,
+                        movilidad: parseInt(tr.querySelector('input[name="movilidad"]').value) || 0,
+                        encamado: parseInt(tr.querySelector('input[name="encamado"]').value) || 0,
+                        convaleciente: parseInt(tr.querySelector('input[name="convaleciente"]').value) || 0,
+                        tratamiento: parseInt(tr.querySelector('input[name="tratamiento"]').value) || 0,
+                        oxigeno: parseInt(tr.querySelector('input[name="oxigeno"]').value) || 0,
+                        dialisis: parseInt(tr.querySelector('input[name="dialisis"]').value) || 0,
+                        parto: parseInt(tr.querySelector('input[name="parto"]').value) || 0,
+                        triaje: tr.querySelector('.triaje-badge').textContent
+                    });
+                    totalPersonas += cantidad;
+                }
+            });
+
+            if (grupos.length === 0 || totalPersonas === 0) {
+                mostrarMensaje('❌ Debe agregar al menos una persona (cantidad > 0).', 'error');
+                return;
+            }
+
+            const observaciones = data.observaciones || '';
+            if (observaciones.length > 300) {
+                mostrarMensaje('❌ Las observaciones no pueden superar los 300 caracteres.', 'error');
+                return;
+            }
+
+            // CONSTRUIR PAYLOAD
+            const payload = {
+                nombres: data.nombres,
+                apellidos: data.apellidos,
+                cedula: data.cedula,
+                fnacimiento: data.fnacimiento || '',
+                telefono: data.telefono,
+                email: data.email,
+                ubicacion: data.ubicacion,        // Código de carga
+                direccion: data.direccion || '',   // Dirección
+                nro_vivienda: data.nro_vivienda,   // Nº Casa/Apartamento
+                grupos: grupos,
+                observaciones: observaciones,
+                fecha: new Date().toISOString()
+            };
+
+            // Enviar con no-cors
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                mostrarMensaje('✅ Censo enviado correctamente.', 'success');
+                limpiarFormulario();
+            } catch (error) {
+                console.error('Error al enviar:', error);
+                mostrarMensaje('❌ Error al enviar. Verifique su conexión e intente de nuevo.', 'error');
+            }
+        }
+
+        // ================================================================
+        // LIMPIAR
+        // ================================================================
+        function limpiarFormulario() {
+            document.getElementById('registroForm').reset();
+            const tbody = document.getElementById('tbody-grupos');
+            tbody.innerHTML = '';
+            agregarFilaGrupo();
+            document.getElementById('contadorObservaciones').textContent = '0 / 300';
+        }
+
+        document.getElementById('btnLimpiar').addEventListener('click', function() {
+            if (confirm('¿Limpiar formulario? Los datos no guardados se perderán.')) {
+                limpiarFormulario();
+                mostrarMensaje('Formulario limpiado.', 'info');
+            }
+        });
+
+        // ================================================================
+        // CONTADOR OBSERVACIONES
+        // ================================================================
+        document.getElementById('observaciones').addEventListener('input', function() {
+            const max = 300;
+            const len = this.value.length;
+            const contador = document.getElementById('contadorObservaciones');
+            contador.textContent = `${len} / ${max}`;
+            if (len > max) {
+                contador.classList.add('limite');
+                this.value = this.value.substring(0, max);
+                contador.textContent = `${max} / ${max}`;
+            } else {
+                contador.classList.remove('limite');
+            }
+        });
+
+        // ================================================================
+        // MENSAJES
+        // ================================================================
+        function mostrarMensaje(texto, tipo) {
+            const msgDiv = document.getElementById('responseMessage');
+            msgDiv.textContent = texto;
+            msgDiv.className = tipo;
+            msgDiv.style.display = 'block';
+            clearTimeout(window.msgTimeout);
+            window.msgTimeout = setTimeout(() => { msgDiv.style.display = 'none'; }, 8000);
+        }
+
+        // ================================================================
+        // INICIALIZACIÓN
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            agregarFilaGrupo();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
